@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Kinisi motor controller</title>
+    <script src="./controller.js"></script>
+    <script src="./main.js"></script>
+  </head>
+  <body onload="main()">
+    <h1>Motor Controller</h1>
+    <p>Use the form below to send commands to the motor controller:</p>
+      <div>
+        <button id="buttonConnectController">Connect</button>
+        <button id="buttonDisconectController" disabled="true" >Diconnect</button>
+      </div>
+      <div>
+        <label for="motorIndex">Direction:</label>
+        <select id="motorIndex">
+          <option value="0">Motor 0</option>
+          <option value="1">Motor 1</option>
+          <option value="2">Motor 2</option>
+          <option value="3">Motor 3</option>
+        </select>
+        <br>
+        <label for="motorDirection">Direction:</label>
+        <input type="range" min="0" max="1" value="0" id="motorDirection">
+        <br>
+        <label for="motorSpeed">Speed:</label>
+        <input type="range" min="0" max="840" value="420" id="motorSpeed">
+        <br><br>
+        <button id = "buttonSetMotorSpeed">Set motor Speed</button><br>
+      </div>
+      <div>
+        <button id = "buttonToggleStatusLED">ToggleStatusLED</button>
+      </div>
+    <p id="status"></p>
+  </body>
+</html>
