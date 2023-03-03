@@ -32,6 +32,7 @@ class MotorController {
       this.writer = null;
       this.baudRate = 115200;
       this.motors = [false, false, false, false];
+      this.onInfoReceived = null;
     }
   
     async connect() {
@@ -42,6 +43,7 @@ class MotorController {
             this.port = await navigator.serial.requestPort();
             await this.port.open({ baudRate: this.baudRate });
             console.log("Connected.");
+            this.startReading();
             return true;
           }
           catch (error) {
@@ -65,6 +67,28 @@ class MotorController {
         console.log("toggleStatusLED");
     }
 
+    async getEncoderValue(encoderIncex){
+      await this.write(new Uint8Array([INITIALIZE_ENCODER, encoderIncex]));
+      await this.write(new Uint8Array([GET_ENCODER_VALUE, encoderIncex]));
+      console.log("getEncoderValue");
+    }
+
+    async setMotorController(motorIndex, kp, ki, kd){
+      await this.write(mergeUint8Arrays(
+        new Uint8Array([MOTOR_SET_CONTROLLER, motorIndex]),
+        doubleToBytes(kp),
+        doubleToBytes(ki),
+        doubleToBytes(kd),
+        ));
+    }
+    async setMotorTargetVelocity(motorIndex, direction, speed){
+      await this.write(new Uint8Array([MOTOR_SET_TARGET_VELOCITY, motorIndex, direction, speed, speed >> 8]));
+    }
+
+    async delMotorController(motorIndex){
+      await this.write(new Uint8Array([MOTOR_DEL_CONTROLLER, motorIndex]));
+    }
+
     async write(msg){
         var data = new Uint8Array(msg.length + 1);
         data[0] = msg.length;
@@ -79,14 +103,41 @@ class MotorController {
   
     async disconnect() {
       if (this.port) {
-        //await this.reader.cancel();
+        await this.reader.cancel();
         //await this.writer.close();
         await this.port.close();
         this.port = null;
-        //this.reader = null;
+        this.reader = null;
         //this.writer = null;
       }
       console.log("Disconnected.");
     }
+
+    async startReading(){
+      this.reader = this.port.readable.getReader();
+
+      var messageBuffer = new MessageBuffer();
+
+      // Listen to data coming from the serial device.
+      while (true) {
+        const { value, done } = await this.reader.read();
+        const decoder = new TextDecoder('utf-8');
+        messageBuffer.push(decoder.decode(value));
+        const messages = messageBuffer.pop();
+        if(this.onInfoReceived){
+          messages.forEach(msg => {
+            console.log(msg);
+            this.onInfoReceived(JSON.parse(msg));
+          });
+        }
+
+        if (done) {
+          // Allow the serial port to be closed later.
+          this.reader.releaseLock();
+          break;
+        }
+      }
+    }
+
   }
   

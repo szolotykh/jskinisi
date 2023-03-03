@@ -2,8 +2,11 @@
 <html lang="en">
   <head>
     <title>Kinisi motor controller</title>
-    <script src="./controller.js"></script>
+    <script src="./utils.js"></script>
+    <script src="./chart_speed_controller.js"></script>
+    <script src="./motor_controller.js"></script>
     <script src="./main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
   </head>
   <body onload="main()">
     <h1>Motor Controller</h1>
@@ -13,7 +16,7 @@
         <button id="buttonDisconectController" disabled="true" >Diconnect</button>
       </div>
       <div>
-        <label for="motorIndex">Direction:</label>
+        <label for="motorIndex">Motor Index:</label>
         <select id="motorIndex">
           <option value="0">Motor 0</option>
           <option value="1">Motor 1</option>
@@ -32,6 +35,32 @@
       <div>
         <button id = "buttonToggleStatusLED">ToggleStatusLED</button>
       </div>
+      <div>
+        <button id = "buttonGetEncoderValue">Get Encoder Value</button>
+      </div>
+      <div>
+        <h2>Motor Controller</h2>
+        <label for="motorControllerIndex">Motor Index:</label>
+        <select id="motorControllerIndex">
+          <option value="0">Motor 0</option>
+          <option value="1">Motor 1</option>
+          <option value="2">Motor 2</option>
+          <option value="3">Motor 3</option>
+        </select>
+        <br>
+        <input type="number" value = "0.4" id="motorControllerKP">
+        <input type="number" value = "0.05" id="motorControllerKI">
+        <input type="number" value = "0.1" id="motorControllerKD">
+        <button id = "buttonSetMotorController">SetMotorController</button><br>
+        <label for="motorTargetDirection">Direction:</label>
+        <input type="range" min="0" max="1" value="1" id="motorTargetDirection">
+        <br>
+        <label for="motorTargetSpeed">Speed:</label>
+        <input type="range" min="0" max="100" value="50" id="motorTargetSpeed"><br>
+        <button id = "buttonSetMotorTargetVelocity">SetMotorTargetVelocity</button><br><br>
+        <button id = "buttonDelMotorController">DelMotorController</button>
+      </div>
     <p id="status"></p>
+    <canvas id="chartSpeedController" style="width:100%;max-width:800px"></canvas>
   </body>
 </html>

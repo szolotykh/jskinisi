@@ -21,7 +21,38 @@ async function main()
         //console.log(motorIndex + ", " + direction + ", " + speed);
     });
 
+    document.querySelector('#buttonSetMotorController').addEventListener('click', async () => {
+    	const motorIndex = document.getElementById("motorControllerIndex").value;
+		const kp = document.getElementById("motorControllerKP").value;
+		const ki = document.getElementById("motorControllerKI").value;
+		const kd = document.getElementById("motorControllerKD").value;
+		controller.setMotorController(parseInt(motorIndex), kp, ki, kd);
+    });
+
+    document.querySelector('#buttonSetMotorTargetVelocity').addEventListener('click', async () => {
+      const motorIndex = document.getElementById("motorControllerIndex").value;
+      const direction = document.getElementById("motorTargetDirection").value;
+      const speed = document.getElementById("motorTargetSpeed").value;
+      controller.setMotorTargetVelocity(parseInt(motorIndex), parseInt(direction), parseInt(speed));
+      //console.log(motorIndex + ", " + direction + ", " + speed);
+    });
+
+	document.querySelector('#buttonDelMotorController').addEventListener('click', async () => {
+		const motorIndex = document.getElementById("motorControllerIndex").value;
+        controller.delMotorController(motorIndex);
+    });
+
+
     document.querySelector('#buttonToggleStatusLED').addEventListener('click', async () => {
         controller.toggleStatusLED();
     });
+
+    document.querySelector('#buttonGetEncoderValue').addEventListener('click', async () => {
+      controller.getEncoderValue(0);
+    });
+
+	var speedChart = new SpeedControllerChart("chartSpeedController");
+	controller.onInfoReceived = function(msg){
+		speedChart.UpdateData(msg.seq, msg.velocity, msg.targetVelocity);
+	}
 }
