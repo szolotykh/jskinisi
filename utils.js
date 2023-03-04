@@ -6,7 +6,6 @@ function doubleToBytes(double) {
     return bytes;
 }
 
-
 function mergeUint8Arrays(...arrays) {
     const totalLength = arrays.reduce((acc, array) => acc + array.length, 0);
     const merged = new Uint8Array(totalLength);

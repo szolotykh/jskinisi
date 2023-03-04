@@ -33,6 +33,8 @@ class MotorController {
       this.baudRate = 115200;
       this.motors = [false, false, false, false];
       this.onInfoReceived = null;
+
+      this.isPlatformInit = false;
     }
   
     async connect() {
@@ -139,5 +141,15 @@ class MotorController {
       }
     }
 
+    async initPlatform(){
+      await this.write(new Uint8Array([PLATFORM_INITIALIZE]));
+    }
+
+    async setPlatformVelocity(x, y, t){
+      if(!this.isPlatformInit){
+        this.initPlatform();
+      }
+      await this.write(new Uint8Array([PLATFORM_SET_VELOCITY_INPUT, x, y, t]));
+    }
   }
   

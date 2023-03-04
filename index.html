@@ -9,11 +9,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
   </head>
   <body onload="main()">
-    <h1>Motor Controller</h1>
+    <h1>Kinisi motor controller</h1>
     <p>Use the form below to send commands to the motor controller:</p>
       <div>
         <button id="buttonConnectController">Connect</button>
         <button id="buttonDisconectController" disabled="true" >Diconnect</button>
+        <p id="status"></p>
       </div>
       <div>
         <label for="motorIndex">Motor Index:</label>
@@ -38,6 +39,7 @@
       <div>
         <button id = "buttonGetEncoderValue">Get Encoder Value</button>
       </div>
+      <!-- Velocity Controller -->
       <div>
         <h2>Motor Controller</h2>
         <label for="motorControllerIndex">Motor Index:</label>
@@ -59,8 +61,18 @@
         <input type="range" min="0" max="100" value="50" id="motorTargetSpeed"><br>
         <button id = "buttonSetMotorTargetVelocity">SetMotorTargetVelocity</button><br><br>
         <button id = "buttonDelMotorController">DelMotorController</button>
+        <canvas id="chartSpeedController" style="width:100%;max-width:800px"></canvas>
       </div>
-    <p id="status"></p>
-    <canvas id="chartSpeedController" style="width:100%;max-width:800px"></canvas>
+      <!-- Platform -->
+      <div>
+        <h2>Platform</h2>
+        <label for="platformVelocityX">X</label>
+        <input type="range" min="-100" max="100" value="0" step="1" id="platformVelocityX"><br>
+        <label for="platformVelocityY">Y</label>
+        <input type="range" min="-100" max="100" value="0" step="1" id="platformVelocityY"><br>
+        <label for="platformVelocityT">T</label>
+        <input type="range" min="-100" max="100" value="0" step="1" id="platformVelocityT"><br>
+        <button id = "buttonSetPlatformVelocity">SetPlatfromVelocity</button><br>
+      </div>
   </body>
 </html>

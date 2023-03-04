@@ -55,4 +55,11 @@ async function main()
 	controller.onInfoReceived = function(msg){
 		speedChart.UpdateData(msg.seq, msg.velocity, msg.targetVelocity);
 	}
+
+	document.querySelector('#buttonSetPlatformVelocity').addEventListener('click', async () => {
+		const x = document.getElementById("platformVelocityX").value;
+		const y = document.getElementById("platformVelocityY").value;
+		const t = document.getElementById("platformVelocityT").value;
+		controller.setPlatformVelocity(x, y, t);
+    });
 }
