@@ -147,7 +147,8 @@ class MotorController {
 
     async setPlatformVelocity(x, y, t){
       if(!this.isPlatformInit){
-        this.initPlatform();
+        await this.initPlatform();
+        this.isPlatformInit = true;
       }
       await this.write(new Uint8Array([PLATFORM_SET_VELOCITY_INPUT, x, y, t]));
     }

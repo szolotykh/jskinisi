@@ -60,6 +60,6 @@ async function main()
 		const x = document.getElementById("platformVelocityX").value;
 		const y = document.getElementById("platformVelocityY").value;
 		const t = document.getElementById("platformVelocityT").value;
-		controller.setPlatformVelocity(x, y, t);
+		controller.setPlatformVelocity(parseInt(x), parseInt(y), parseInt(t));
     });
 }
