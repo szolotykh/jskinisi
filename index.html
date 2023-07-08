@@ -7,6 +7,9 @@
     <script src="./motor_controller.js"></script>
     <script src="./main.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="./main.css">
   </head>
   <body onload="main()">
     <h1>Kinisi motor controller</h1>
@@ -16,7 +19,19 @@
         <button id="buttonDisconectController" disabled="true" >Diconnect</button>
         <p id="status"></p>
       </div>
+
       <div>
+        <button id = "buttonToggleStatusLED">ToggleStatusLED</button>
+      </div>
+
+      <div class="w3-bar w3-black">
+        <button class="w3-bar-item w3-button" onclick="openTab('tabMotor')">Motor</button>
+        <button class="w3-bar-item w3-button" onclick="openTab('tabController')">Controller</button>
+        <button class="w3-bar-item w3-button" onclick="openTab('tabPlatform')">Platform</button>
+      </div>
+
+    <!-- Motor -->
+      <div id="tabMotor" class="controllerTab w3-panel">
         <label for="motorIndex">Motor Index:</label>
         <select id="motorIndex">
           <option value="0">Motor 0</option>
@@ -30,17 +45,15 @@
         <br>
         <label for="motorSpeed">Speed:</label>
         <input type="range" min="0" max="840" value="420" id="motorSpeed">
-        <br><br>
+        <br>
         <button id = "buttonSetMotorSpeed">Set motor Speed</button><br>
+        <div>
+            <button id = "buttonGetEncoderValue">Get Encoder Value</button>
+        </div>
       </div>
-      <div>
-        <button id = "buttonToggleStatusLED">ToggleStatusLED</button>
-      </div>
-      <div>
-        <button id = "buttonGetEncoderValue">Get Encoder Value</button>
-      </div>
+
       <!-- Velocity Controller -->
-      <div>
+      <div id="tabController" class="controllerTab w3-panel">
         <h2>Motor Controller</h2>
         <label for="motorControllerIndex">Motor Index:</label>
         <select id="motorControllerIndex">
@@ -64,7 +77,7 @@
         <canvas id="chartSpeedController" style="width:100%;max-width:800px"></canvas>
       </div>
       <!-- Platform -->
-      <div>
+      <div id="tabPlatform" class="controllerTab w3-panel">
         <h2>Platform</h2>
         <label for="platformVelocityX">X</label>
         <input type="range" min="-100" max="100" value="0" step="1" id="platformVelocityX"><br>

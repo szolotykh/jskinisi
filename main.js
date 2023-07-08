@@ -63,3 +63,11 @@ async function main()
 		controller.setPlatformVelocity(parseInt(x), parseInt(y), parseInt(t));
     });
 }
+
+function openTab(tabName) {
+	var tabs = document.getElementsByClassName("controllerTab");
+	for (var i = 0; i < tabs.length; i++) {
+		tabs[i].style.display = "none";
+	}
+	document.getElementById(tabName).style.display = "block";
+  }

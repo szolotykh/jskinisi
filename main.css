@@ -1,0 +1,7 @@
+.controllerTab {
+    display: none;
+}
+
+#tabController {
+    display: block;
+}
