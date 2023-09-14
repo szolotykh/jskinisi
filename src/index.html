@@ -4,7 +4,8 @@
     <title>Kinisi motor controller</title>
     <script src="./utils.js"></script>
     <script src="./chart_speed_controller.js"></script>
-    <script src="./motor_controller.js"></script>
+    <script src="./commands/kinisi_commands.js"></script>
+    <script src="./commands/kinisi_client.js"></script>
     <script src="./main.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 
@@ -49,6 +50,7 @@
         <button id = "buttonSetMotorSpeed">Set motor Speed</button><br>
         <div>
             <button id = "buttonGetEncoderValue">Get Encoder Value</button>
+            <div id="encoderValue"></div>
         </div>
       </div>
 
