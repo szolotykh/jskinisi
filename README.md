@@ -12,3 +12,9 @@ cd ./scripts
 python3 generate_commands.py
 ```
 The script will generate a new file called `kinisi_commands.js` in the `./src/commands` directory.
+
+## Links
+- [Kinisi Motion Controller firmware](https://github.com/szolotykh/kinisi-motor-controller-firmware)
+- [Kinisi Motion Controller hardware](https://github.com/szolotykh/kinisi-motor-controller-board)
+- [JavaScipt package for kinisi motor controller](https://github.com/szolotykh/jskinisi)
+- [Python package for kinisi motor controller](https://github.com/szolotykh/pykinisi)

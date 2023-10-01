@@ -1,3 +1,23 @@
+// ----------------------------------------------------------------------------
+// Filename: kinisi_client.js
+// Description: KinisiClient class is an implementation serial communication with the Kinisi controller.
+// It is implements the commands defined in kinisi_commands.js.
+// ----------------------------------------------------------------------------
+
+const MotorIndex = {
+  Motor0: 0,
+  Motor1: 1,
+  Motor2: 2,
+  Motor3: 3,
+}
+
+const EncoderIndex = {
+  Encoder0: 0,
+  Encoder1: 1,
+  Encoder2: 2,
+  Encoder3: 3,
+}
+
 class KinisiClient extends Commands {
     // Constructor
     constructor() {
@@ -45,8 +65,7 @@ class KinisiClient extends Commands {
             offset += value.byteLength;
         }
         await reader.releaseLock();
-        var dataView = new DataView(buffer, 0);
-        return dataView.getInt16(0, true);
+        return buffer;
     }
 
     async disconnect() {

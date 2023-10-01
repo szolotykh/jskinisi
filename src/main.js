@@ -19,7 +19,6 @@ async function main()
         const speed = parseInt(document.getElementById("motorSpeed").value);
         await controller.initialize_motor(motorIndex);
         await controller.set_motor_speed(motorIndex, direction, speed);
-        //console.log(motorIndex + ", " + direction + ", " + speed);
     });
 
     document.querySelector('#buttonSetMotorController').addEventListener('click', async () => {
@@ -43,13 +42,8 @@ async function main()
         controller.delete_motor_controller(motorIndex);
     });
 
-
-    document.querySelector('#buttonToggleStatusLED').addEventListener('click', async () => {
-        controller.toggle_status_led();
-    });
-
     document.querySelector('#buttonGetEncoderValue').addEventListener('click', async () => {
-      const encoderIndex = 0;
+      const encoderIndex = parseInt(document.getElementById("encoderIndex").value);
       await controller.initialize_encoder(encoderIndex);
       var value = await controller.get_encoder_value(encoderIndex);
       document.getElementById("encoderValue").innerHTML = value;
@@ -66,6 +60,8 @@ async function main()
 		const t = document.getElementById("platformVelocityT").value;
 		controller.set_platform_velocity_input(parseInt(x), parseInt(y), parseInt(t));
     });
+
+  generateGPIOPins(controller);
 }
 
 function openTab(tabName) {
@@ -74,4 +70,4 @@ function openTab(tabName) {
 		tabs[i].style.display = "none";
 	  }
 	document.getElementById(tabName).style.display = "block";
-  }
+}
