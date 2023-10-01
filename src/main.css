@@ -1,0 +1,15 @@
+.controllerTab {
+    display: none;
+}
+
+#tabGPIO {
+    display: block;
+}
+
+.gpioPanel {
+    display: none;
+}
+
+.gpio-div {
+    min-height: 100px;
+}

@@ -4,7 +4,9 @@
     <title>Kinisi motor controller</title>
     <script src="./utils.js"></script>
     <script src="./chart_speed_controller.js"></script>
-    <script src="./motor_controller.js"></script>
+    <script src="./commands/kinisi_commands.js"></script>
+    <script src="./commands/kinisi_client.js"></script>
+    <script src="./gpio.js"></script>
     <script src="./main.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 
@@ -20,18 +22,16 @@
         <p id="status"></p>
       </div>
 
-      <div>
-        <button id = "buttonToggleStatusLED">ToggleStatusLED</button>
-      </div>
-
       <div class="w3-bar w3-black">
         <button class="w3-bar-item w3-button" onclick="openTab('tabMotor')">Motor</button>
         <button class="w3-bar-item w3-button" onclick="openTab('tabController')">Controller</button>
         <button class="w3-bar-item w3-button" onclick="openTab('tabPlatform')">Platform</button>
+        <button class="w3-bar-item w3-button" onclick="openTab('tabGPIO')">GPIO</button>
       </div>
 
     <!-- Motor -->
       <div id="tabMotor" class="controllerTab w3-panel">
+        <h2>Motor</h2>
         <label for="motorIndex">Motor Index:</label>
         <select id="motorIndex">
           <option value="0">Motor 0</option>
@@ -47,8 +47,18 @@
         <input type="range" min="0" max="840" value="420" id="motorSpeed">
         <br>
         <button id = "buttonSetMotorSpeed">Set motor Speed</button><br>
+        <hr>
+        <h2>Encoder</h2>
         <div>
-            <button id = "buttonGetEncoderValue">Get Encoder Value</button>
+          <label for="encoderIndex">Motor Index:</label>
+          <select id="encoderIndex">
+            <option value="0">Encoder 0</option>
+            <option value="1">Encoder 1</option>
+            <option value="2">Encoder 2</option>
+            <option value="3">Encoder 3</option>
+          </select><br>
+          <button id = "buttonGetEncoderValue">Get Encoder Value</button>
+          <div id="encoderValue"></div>
         </div>
       </div>
 
@@ -87,5 +97,7 @@
         <input type="range" min="-100" max="100" value="0" step="1" id="platformVelocityT"><br>
         <button id = "buttonSetPlatformVelocity">SetPlatfromVelocity</button><br>
       </div>
+      <!-- GPIO -->
+      <div id="tabGPIO" class="controllerTab w3-panel"></div>
   </body>
 </html>
