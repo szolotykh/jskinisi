@@ -17,8 +17,20 @@ async function main()
         const motorIndex = parseInt(document.getElementById("motorIndex").value);
         const direction = parseInt(document.getElementById("motorDirection").value);
         const speed = parseInt(document.getElementById("motorSpeed").value);
-        await controller.initialize_motor(motorIndex);
+        const is_reversed = document.getElementById("motorIsReversed").checked;
+        await controller.initialize_motor(motorIndex, is_reversed);
+        console.log(is_reversed);
         await controller.set_motor_speed(motorIndex, direction, speed);
+    });
+
+    document.querySelector('#buttonStopMotor').addEventListener('click', async () => {
+      const motorIndex = parseInt(document.getElementById("motorIndex").value);
+      await controller.stop_motor(motorIndex);
+    });
+
+    document.querySelector('#buttonBrakeMotor').addEventListener('click', async () => {
+      const motorIndex = parseInt(document.getElementById("motorIndex").value);
+      await controller.brake_motor(motorIndex);
     });
 
     document.querySelector('#buttonSetMotorController').addEventListener('click', async () => {
@@ -53,6 +65,23 @@ async function main()
 	controller.onInfoReceived = function(msg){
 		speedChart.UpdateData(msg.seq, msg.velocity, msg.targetVelocity);
 	}
+
+  // Initialize mecanum platform
+  document.querySelector('#buttonInitializeMecanumPlatform').addEventListener('click', async () => {
+		const motor0 = document.getElementById("mecanumPlatformIsReverse0").checked;
+		const motor1 = document.getElementById("mecanumPlatformIsReverse1").checked;
+		const motor2 = document.getElementById("mecanumPlatformIsReverse2").checked;
+    const motor3 = document.getElementById("mecanumPlatformIsReverse3").checked;
+		controller.initialize_mecanum_platform(motor0, motor1, motor2, motor3);
+    });
+
+  // Initialize omni platform
+  document.querySelector('#buttonInitializeOmniPlatform').addEventListener('click', async () => {
+    const motor0 = document.getElementById("omniPlatformIsReverse0").checked;
+    const motor1 = document.getElementById("omniPlatformIsReverse1").checked;
+    const motor2 = document.getElementById("omniPlatformIsReverse2").checked;
+    controller.initialize_omni_platform(motor0, motor1, motor2, 1, 1);
+    });
 
 	document.querySelector('#buttonSetPlatformVelocity').addEventListener('click', async () => {
 		const x = document.getElementById("platformVelocityX").value;
