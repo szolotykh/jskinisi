@@ -40,6 +40,9 @@
           <option value="3">Motor 3</option>
         </select>
         <br>
+        <label for="motorIsReversed">Is Reverse</label>
+        <input type="checkbox" id="motorIsReversed">
+        <br>
         <label for="motorDirection">Direction:</label>
         <input type="range" min="0" max="1" value="0" id="motorDirection">
         <br>
@@ -47,6 +50,8 @@
         <input type="range" min="0" max="840" value="420" id="motorSpeed">
         <br>
         <button id = "buttonSetMotorSpeed">Set motor Speed</button><br>
+        <button id = "buttonStopMotor">Stop motor</button><br>
+        <button id = "buttonBrakeMotor">Brake motor</button><br>
         <hr>
         <h2>Encoder</h2>
         <div>
@@ -88,14 +93,52 @@
       </div>
       <!-- Platform -->
       <div id="tabPlatform" class="controllerTab w3-panel">
-        <h2>Platform</h2>
-        <label for="platformVelocityX">X</label>
-        <input type="range" min="-100" max="100" value="0" step="1" id="platformVelocityX"><br>
-        <label for="platformVelocityY">Y</label>
-        <input type="range" min="-100" max="100" value="0" step="1" id="platformVelocityY"><br>
-        <label for="platformVelocityT">T</label>
-        <input type="range" min="-100" max="100" value="0" step="1" id="platformVelocityT"><br>
-        <button id = "buttonSetPlatformVelocity">SetPlatfromVelocity</button><br>
+
+        <label for="platformSelector">Platform:</label>
+        <select id="platformSelector">
+          <option value="0">Mecanum Platform</option>
+          <option value="1">Omni Platfrom</option>
+        </select>
+
+        <div id="mecanuPlatform">
+          <h2>Mecanum Platform</h2>
+          <div>
+            Motor setup (is reversed):<br>
+            <label for="mecanumPlatformIsReverse0">0</label>
+            <input type="checkbox" id="mecanumPlatformIsReverse0">
+            <label for="mecanumPlatformIsReverse1">1</label>
+            <input type="checkbox" id="mecanumPlatformIsReverse1">
+            <label for="mecanumPlatformIsReverse2">2</label>
+            <input type="checkbox" id="mecanumPlatformIsReverse2">
+            <label for="mecanumPlatformIsReverse3">3</label>
+            <input type="checkbox" id="mecanumPlatformIsReverse3">
+          </div>
+          <button id = "buttonInitializeMecanumPlatform">Initialize</button><br>
+        </div>
+
+        <div id="omniPlatform">
+          <h2>Omni Platform</h2>
+          <div>
+            Motor setup (is reversed):<br>
+            <label for="omniPlatformIsReverse0">0</label>
+            <input type="checkbox" id="omniPlatformIsReverse0">
+            <label for="omniPlatformIsReverse1">1</label>
+            <input type="checkbox" id="omniPlatformIsReverse1">
+            <label for="omniPlatformIsReverse2">2</label>
+            <input type="checkbox" id="omniPlatformIsReverse2">
+          </div>
+          <button id = "buttonInitializeOmniPlatform">Initialize</button><br>
+        </div>
+
+        <div>
+          <label for="platformVelocityX">X</label>
+          <input type="range" min="-100" max="100" value="0" step="10" id="platformVelocityX"><br>
+          <label for="platformVelocityY">Y</label>
+          <input type="range" min="-100" max="100" value="0" step="10" id="platformVelocityY"><br>
+          <label for="platformVelocityT">T</label>
+          <input type="range" min="-100" max="100" value="0" step="10" id="platformVelocityT"><br>
+          <button id = "buttonSetPlatformVelocity">SetPlatfromVelocity</button><br>
+        </div>
       </div>
       <!-- GPIO -->
       <div id="tabGPIO" class="controllerTab w3-panel"></div>
