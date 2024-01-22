@@ -1,12 +1,11 @@
 import requests
-import subprocess
 import os
 import shutil
+from sdkgenerator import generate
 
 branch = 'main'
 
-files = [f'https://raw.githubusercontent.com/szolotykh/kinisi-motor-controller-firmware/{branch}/tools/commands_generator/generator.py',
-         f'https://raw.githubusercontent.com/szolotykh/kinisi-motor-controller-firmware/{branch}/commands.json']
+files = [f'https://raw.githubusercontent.com/szolotykh/kinisi-motor-controller-firmware/{branch}/commands.json']
 
 shutil.rmtree('./tmp', ignore_errors=True)
 os.mkdir('./tmp')
@@ -15,6 +14,5 @@ for url in files:
   with open(f"./tmp/{url.split('/')[-1]}", 'wb') as f:
     f.write(response.content)
 
-# python generator.py commands.json kinisi_commands.py --language python
-subprocess.call(["python", "./tmp/generator.py", "./tmp/commands.json", "./../src/commands/kinisi_commands.js", "--language", "js"])
+generate("./tmp/commands.json", "./../src/commands/kinisi_commands.js", "ES6")
 shutil.rmtree('./tmp', ignore_errors=True)

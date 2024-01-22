@@ -1,4 +1,5 @@
 scripts/tmp
+*.pyc
 
 # dependencies
 /node_modules
