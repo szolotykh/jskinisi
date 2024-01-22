@@ -249,3 +249,5 @@ class Commands {
     }
 
 }
+
+export {Commands}

@@ -1,0 +1,20 @@
+.platform-tab .w3-button{
+    margin-top: 4px;
+    width: 200px;
+    display: block;
+}
+
+.platform-tab input[type=range]{
+    display: block;
+    width: 200px;
+}
+
+.platform-tab select{
+    display: block;
+    width: 200px;
+}
+
+.span-check
+{
+    margin-right: 15px;
+}

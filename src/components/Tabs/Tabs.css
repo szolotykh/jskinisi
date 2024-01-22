@@ -1,0 +1,24 @@
+.tab {
+    padding: 10px;
+    border: none;
+    background-color: #eee;
+    cursor: pointer;
+}
+
+.tab.active {
+    background-color: #ccc;
+}
+
+.tab-titles {
+    display: flex;
+}
+
+.tab-content {
+    border: 1px solid #ccc;
+    padding: 20px;
+}
+
+.disabled-div {
+    pointer-events: none; /* Prevents clicking on elements inside the div */
+    opacity: 0.4;         /* Makes the div look faded or disabled */
+}

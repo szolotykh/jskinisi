@@ -4,6 +4,8 @@
 // It is implements the commands defined in kinisi_commands.js.
 // ----------------------------------------------------------------------------
 
+import { Commands } from './kinisi_commands';
+
 const MotorIndex = {
   Motor0: 0,
   Motor1: 1,
@@ -20,12 +22,19 @@ const EncoderIndex = {
 
 class KinisiClient extends Commands {
     // Constructor
-    constructor() {
+    constructor(onDisconnect) {
       super();
       this.port = null;
       this.reader = null;
       this.writer = null;
       this.baudRate = 115200;
+      this.onDisconnect = onDisconnect;
+      navigator.serial.addEventListener("disconnect", (event) => {
+        console.log("Disconnected from serial port.");
+        if (this.onDisconnect) {
+          this.onDisconnect(event);
+        }
+      });
     }
 
     async connect() {
@@ -77,3 +86,5 @@ class KinisiClient extends Commands {
         console.log("Disconnected.");
       }
   }
+
+export { KinisiClient, MotorIndex, EncoderIndex };
