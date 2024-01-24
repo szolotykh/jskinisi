@@ -1,18 +1,32 @@
+import argparse
 import requests
 import os
 import shutil
 from sdkgenerator import generate
 
-branch = 'main'
+def main():
+  # Create the parser
+  parser = argparse.ArgumentParser(description='Update commands from a specific branch.')
 
-files = [f'https://raw.githubusercontent.com/szolotykh/kinisi-motor-controller-firmware/{branch}/commands.json']
+  # Add the arguments
+  parser.add_argument('--branch', type=str, default='main', help='The branch to update commands from.')
 
-shutil.rmtree('./tmp', ignore_errors=True)
-os.mkdir('./tmp')
-for url in files:
-  response = requests.get(url)
-  with open(f"./tmp/{url.split('/')[-1]}", 'wb') as f:
-    f.write(response.content)
+  # Parse the arguments
+  args = parser.parse_args()
 
-generate("./tmp/commands.json", "./../src/commands/kinisi_commands.js", "ES6")
-shutil.rmtree('./tmp', ignore_errors=True)
+  branch = args.branch
+
+  files = [f'https://raw.githubusercontent.com/szolotykh/kinisi-motor-controller-firmware/{branch}/commands.json']
+
+  shutil.rmtree('./tmp', ignore_errors=True)
+  os.mkdir('./tmp')
+  for url in files:
+    response = requests.get(url)
+    with open(f"./tmp/{url.split('/')[-1]}", 'wb') as f:
+      f.write(response.content)
+
+  generate("./tmp/commands.json", "./../src/commands/kinisi_commands.js", "ES6")
+  shutil.rmtree('./tmp', ignore_errors=True)
+
+if __name__ == "__main__":
+  main()

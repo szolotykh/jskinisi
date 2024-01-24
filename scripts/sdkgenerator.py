@@ -58,44 +58,106 @@ def validate_json(commands_data):
         errors.extend(validate_command(command))
     return errors
 
+# Map of type names to their corresponding setter functions in the DataView class
+type_to_js_setter_func_map = {
+    "bool": {
+        "set":"setUint8",
+        "get":"getUint8"
+        },
+    "uint8_t": {
+        "set":"setUint8",
+        "get":"getUint8"
+        },
+    "uint16_t": {
+        "set":"setUint16",
+        "get":"getUint16"
+        },
+    "uint32_t": {
+        "set":"setUint32",
+        "get":"getUint32"
+        },
+    "int8_t": {
+        "set":"setInt8", 
+        "get":"getInt8"
+        },
+    'int16_t': {
+        "set":"setInt16",
+        "get":"getInt16"
+        },
+    'int32_t': {
+        "set":"setInt32",
+        "get":"getInt32"
+        },
+    "double": {
+        "set":"setFloat64",
+        "get":"getFloat64"
+        }
+    }
+
+# Calculates object size
+def get_object_size(object_data):
+    size = 0
+    for prop in object_data.get("properties", []):
+        size += type_to_size_map.get(prop['type'])
+    return size
+
+# Get object name in pascal case
+def get_object_name(object_data):
+    # Convert string to pascal case Example motor_controller_state -> MotorControllerState
+    return ''.join([word.capitalize() for word in object_data['name'].split('_')])
+
+# Generates JavaScript code for an object
+def generate_object(object_data):
+    result = ""
+    result += f"class {get_object_name(object_data)} {{\n"
+    # Generate constructor
+    result += "    constructor(\n"
+    for prop in object_data.get("properties", []):
+        result += f"        {prop['name']},\n"
+    result += "    )\n"
+    result += "    {\n"
+    for prop in object_data.get("properties", []):
+        result += f"        this.{prop['name']} = {prop['name']};\n"
+    result += "    }\n\n"
+
+    # Generate get size method
+    result += "    getSize() {\n"
+    result += f"        return {get_object_size(object_data)};\n"
+    result += "    }\n\n"
+
+
+    # Genetate encode method
+    result += "    encode() {\n"
+    result += f"        const buffer = new ArrayBuffer(this.getSize());\n"
+    result += f"        const view = new DataView(buffer);\n"
+    offset = 0
+    for prop in object_data.get("properties", []):
+        setter_func = type_to_js_setter_func_map[prop['type']].get("set")
+        little_endian = ", true" if type_to_size_map[prop['type']] > 1 else ""
+        result += f"        view.{setter_func}({offset}, this.{prop['name']}{little_endian});  // {prop['name']}\n"
+        offset += type_to_size_map.get(prop['type'], 1)
+    result += "        return buffer;\n"
+    result += "    }\n\n"
+
+    # Generate decode method
+    result += "    static decode(buffer) {\n"
+    result += f"        const view = new DataView(buffer);\n"
+    result += f"        const obj = new {get_object_name(object_data)}(\n"
+    offset = 0
+    for prop in object_data.get("properties", []):
+        getter_func = type_to_js_setter_func_map[prop['type']].get("get")
+        little_endian = ", true" if type_to_size_map[prop['type']] > 1 else ""
+        result += f"            view.{getter_func}({offset}{little_endian}),  // {prop['name']}\n"
+        offset += type_to_size_map.get(prop['type'], 1)
+    result += "        );\n"
+    result += "        return obj;\n"
+    result += "    }\n"
+
+    result += "}\n\n"
+    return result
+
 # Generates JavaScript code from the commands JSON file
 def generate_js_code(commands_data, js_verson = ""):
-
-    # Map of type names to their corresponding setter functions in the DataView class
-    type_to_js_setter_func_map = {
-        "bool": {
-            "set":"setUint8",
-            "get":"getUint8"
-            },
-        "uint8_t": {
-            "set":"setUint8",
-            "get":"getUint8"
-            },
-        "uint16_t": {
-            "set":"setUint16",
-            "get":"getUint16"
-            },
-        "uint32_t": {
-            "set":"setUint32",
-            "get":"getUint32"
-            },
-        "int8_t": {
-            "set":"setInt8", 
-            "get":"getInt8"
-            },
-        'int16_t': {
-            "set":"setInt16",
-            "get":"getInt16"
-            },
-        'int32_t': {
-            "set":"setInt32",
-            "get":"getInt32"
-            },
-        "double": {
-            "set":"setFloat64",
-            "get":"getFloat64"
-            },
-    }
     
     # Generate constants for command codes
     constant_code = ""
@@ -111,6 +173,11 @@ def generate_js_code(commands_data, js_verson = ""):
     abstract_methods += "    async read(numBytes) {\n"
     abstract_methods += "        throw new Error(\"read method must be implemented\");\n"
     abstract_methods += "    }\n\n"
+
+    # Generate objects
+    objects = ""
+    for obj in commands_data.get("objects", []):
+        objects += generate_object(obj)
 
     # Generate function for each command
     function_code = ""
@@ -140,28 +207,46 @@ def generate_js_code(commands_data, js_verson = ""):
 
         response = cmd.get("response", None)
         if response != None:
-            func_body += f"        const result = await this.read({type_to_size_map[response['type']]})\n"
-            func_body += f"        const dataView = new DataView(result, 0);\n"
-            # if type size map is 1, then it is a single byte and we don't need to specify the endianness
-            if type_to_size_map[response['type']] == 1:
-                func_body += f"        return dataView.{type_to_js_setter_func_map[response['type']].get('get')}(0);\n"
+            # Determine the size of the response
+            response_size = 0
+            if response['type'] in type_to_size_map:
+                response_size = type_to_size_map.get(response['type'])
             else:
-                func_body += f"        return dataView.{type_to_js_setter_func_map[response['type']].get('get')}(0, true);\n"
+                response_size = get_object_size(response)
 
+            func_body += f"        const result = await this.read({response_size})\n"
+            func_body += f"        const dataView = new DataView(result, 0);\n"
+            
+            # Check if the response is a primitive type or an object
+            if response['type'] in type_to_js_setter_func_map:
+                # if type size map is 1, then it is a single byte and we don't need to specify the endianness
+                if type_to_size_map[response['type']] == 1:
+                    func_body += f"        return dataView.{type_to_js_setter_func_map[response['type']].get('get')}(0);\n"
+                else:
+                    func_body += f"        return dataView.{type_to_js_setter_func_map[response['type']].get('get')}(0, true);\n"
+            else:
+                # We can use get_object_name here since response also has a name property
+                func_body += f"        return {get_object_name(response)}.decode(result);\n"
+                
         func_body += "    }\n\n"
         function_code += func_body
 
     # Generate the final code
     result = file_header(commands_data['version'])
     result += constant_code
+    result += objects
     result += "class Commands {\n"
     result += abstract_methods
     result += function_code
     result += "}\n"
 
     if js_verson == "ES6":
+        exports = "Commands"
+        for obj in commands_data.get("objects", []):
+            exports += f", {get_object_name(obj)}"
+
         result += "\n"
-        result += "export {Commands}"
+        result += f"export {{{exports}}}"
     return result
 
 # Generate python code from the commands from the input JSON file

@@ -15,8 +15,9 @@ npm start
 To update the command file, run the following command:
 ```
 cd ./scripts
-python3 generate_commands.py
+python update-commands.py --branch=main
 ```
+Where branch parameter is optional.\
 The script will generate a new file called `kinisi_commands.js` in the `./src/commands` directory.
 
 ## Links

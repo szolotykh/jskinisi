@@ -1,5 +1,7 @@
+# Python
 scripts/tmp
 *.pyc
+__pycache__
 
 # dependencies
 /node_modules
