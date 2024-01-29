@@ -14,7 +14,8 @@ npm start
 ## Updating command file
 To update the command file, run the following command:
 ```
-cd ./scripts
+cd ./tools
+pip install -r requirements.txt
 python update-commands.py --branch=main
 ```
 Where branch parameter is optional.\

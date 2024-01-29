@@ -1,0 +1,12 @@
+.container {
+    display: flex;
+}
+
+.column {
+    flex: 1;
+    padding: 10px;
+}
+
+.motor-controller-options {
+    width: 10%;
+}

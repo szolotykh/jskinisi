@@ -7,8 +7,7 @@ function MotorTab(){
     
     const [motorIndex, setMotorIndex] = useState('0');
     const [isMotorReversed, setIsMotorReversed] = useState(false);
-    const [motorDirection, setMotorDirection] = useState('0');
-    const [motorSpeed, setMotorSpeed] = useState(420);
+    const [motorSpeed, setMotorSpeed] = useState(0);
     const [encoderIndex, setEncoderIndex] = useState('0');
     const [encoderValue, setEncoderValue] = useState('');
 
@@ -18,10 +17,6 @@ function MotorTab(){
 
     const handleMotorReversedChange = (event) => {
         setIsMotorReversed(event.target.checked);
-    };
-
-    const handleMotorDirectionChange = (event) => {
-        setMotorDirection(event.target.value);
     };
 
     const handleMotorSpeedChange = (event) => {
@@ -37,18 +32,20 @@ function MotorTab(){
         console.log(`Setting motor ${motorIndex} speed to ${motorSpeed}, reverse: ${isMotorReversed}`);
 
         await controller.initialize_motor(motorIndex, isMotorReversed);
-        await controller.set_motor_speed(motorIndex, motorDirection, motorSpeed);
+        await controller.set_motor_speed(motorIndex, motorSpeed);
     };
 
     // Simulated function to stop the motor
     const stopMotorFunction = async () => {
         console.log(`Stopping motor ${motorIndex}`);
+        setMotorSpeed(0);
         await controller.stop_motor(motorIndex);
     };
 
     // Simulated function to brake the motor
     const brakeMotorFunction = async () => {
         console.log(`Braking motor ${motorIndex}`);
+        setMotorSpeed(0);
         await controller.brake_motor(motorIndex);
     };
 
@@ -77,12 +74,8 @@ function MotorTab(){
                 <input type='checkbox' className='w3-check' checked={isMotorReversed} onChange={handleMotorReversedChange}/>
             </p>
             <p>
-                <label htmlFor='motorDirection'>Direction:</label>
-                <input type='range' min='0' max='1' value={motorDirection} id='motorDirection' onChange={handleMotorDirectionChange}/>
-            </p>
-            <p>
-                <label htmlFor='motorSpeed'>Speed:</label>
-                <input className='' type='range' min='0' max='840' value={motorSpeed} id='motorSpeed' onChange={handleMotorSpeedChange}/>
+                <label htmlFor='motorSpeed'>Speed (PWM):</label>
+                <input className='' type='range' min='-100' max='100' value={motorSpeed} id='motorSpeed' onChange={handleMotorSpeedChange}/>
                 <button className='w3-button w3-blue' onClick={setMotorSpeedFunction}>Set motor Speed</button>
                 <button className='w3-button w3-blue' onClick={stopMotorFunction}>Stop motor</button>
                 <button className='w3-button w3-blue' onClick={brakeMotorFunction}>Brake motor</button>

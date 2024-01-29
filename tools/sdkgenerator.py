@@ -121,7 +121,7 @@ def generate_object(object_data):
     result += "    }\n\n"
 
     # Generate get size method
-    result += "    getSize() {\n"
+    result += "    static getSize() {\n"
     result += f"        return {get_object_size(object_data)};\n"
     result += "    }\n\n"
 
@@ -208,17 +208,17 @@ def generate_js_code(commands_data, js_verson = ""):
         response = cmd.get("response", None)
         if response != None:
             # Determine the size of the response
-            response_size = 0
             if response['type'] in type_to_size_map:
-                response_size = type_to_size_map.get(response['type'])
+                func_body += f"        const response_size = {type_to_size_map[response['type']]};\n"
             else:
-                response_size = get_object_size(response)
+                func_body += f"        const response_size = {get_object_name(response)}.getSize();\n"
 
-            func_body += f"        const result = await this.read({response_size})\n"
-            func_body += f"        const dataView = new DataView(result, 0);\n"
-            
+            # Read the response
+            func_body += "        const result = await this.read(response_size);\n"
+
             # Check if the response is a primitive type or an object
             if response['type'] in type_to_js_setter_func_map:
+                func_body += "        const dataView = new DataView(result, 0);\n"
                 # if type size map is 1, then it is a single byte and we don't need to specify the endianness
                 if type_to_size_map[response['type']] == 1:
                     func_body += f"        return dataView.{type_to_js_setter_func_map[response['type']].get('get')}(0);\n"
