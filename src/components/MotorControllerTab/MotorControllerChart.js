@@ -32,42 +32,48 @@ export const options = {
 class MotorControllerChart extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            data:{
-                labels:[],
-                datasets: [
-                  {
-                    label: 'output',
-                    data: [],
-                    borderColor: 'rgb(0, 128, 0)',
-                    backgroundColor: 'rgba(0, 128, 0, 0.5)',
-                    pointRadius: 2,
-                  },
-                  {
-                    label: 'target_speed',
-                    data: [],
-                    borderColor: 'rgb(255, 0, 0)',
-                    backgroundColor: 'rgba(255, 0, 0, 0.5)',
-                    pointRadius: 2,
-                  },
-                  {
-                    label: 'error',
-                    data: [],
-                    borderColor: 'rgb(0, 255, 255)',
-                    backgroundColor: 'rgba(0, 255, 255, 0.5)',
-                    pointRadius: 2,
-                  },
-                  {
-                    label: 'current_speed',
-                    data: [],
-                    borderColor: 'rgb(0, 0, 255)',
-                    backgroundColor: 'rgba(0, 0, 255, 0.5)',
-                    pointRadius: 2,
-                  }
-                ],
-              }
-        }
+        this.initialState = {
+          data:{
+              labels:[],
+              datasets: [
+                {
+                  label: 'output',
+                  data: [],
+                  borderColor: 'rgb(0, 128, 0)',
+                  backgroundColor: 'rgba(0, 128, 0, 0.5)',
+                  pointRadius: 2,
+                },
+                {
+                  label: 'target_speed',
+                  data: [],
+                  borderColor: 'rgb(255, 0, 0)',
+                  backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                  pointRadius: 2,
+                },
+                {
+                  label: 'error',
+                  data: [],
+                  borderColor: 'rgb(0, 255, 255)',
+                  backgroundColor: 'rgba(0, 255, 255, 0.5)',
+                  pointRadius: 2,
+                },
+                {
+                  label: 'current_speed',
+                  data: [],
+                  borderColor: 'rgb(0, 0, 255)',
+                  backgroundColor: 'rgba(0, 0, 255, 0.5)',
+                  pointRadius: 2,
+                }
+              ],
+            }
+      };
+
+      this.state = {...this.initialState};
     }
+
+    resetChart = () => {
+        this.setState(this.initialState);
+    };
 
     componentDidUpdate(prevProps) {
         // max 100 data points
@@ -81,19 +87,6 @@ class MotorControllerChart extends Component {
               datasets: prevState.data.datasets.map(dataset => ({
                 ...dataset,
                 data: [...dataset.data, this.props.motorControllerState[dataset.label]].slice(-maxDataPoints),
-              })),
-            },
-          }));
-        }
-        if (prevProps.motorIndex !== this.props.motorIndex) {
-          this.setState(prevState => ({
-            ...prevState,
-            data: {
-              ...prevState.data,
-              labels: [],
-              datasets: prevState.data.datasets.map(dataset => ({
-                ...dataset,
-                data: [],
               })),
             },
           }));

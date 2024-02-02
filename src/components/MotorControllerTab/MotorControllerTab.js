@@ -1,9 +1,13 @@
-import React, { useState, useContext, useEffect} from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ControllerContext } from '../../contexts/ControllerContext';
 import './MotorControllerTab.css';
 import MotorControllerChart from './MotorControllerChart';
 
 function MotorControllerTab(){
+    const updateInterval = 500;
+    const motorControllerChartRef = useRef();
+    const updateStateIntervalId = useRef(null);
+
     const { controller, isConnected} = useContext(ControllerContext);
     
     const [motorIndex, setMotorIndex] = useState('0');
@@ -15,8 +19,8 @@ function MotorControllerTab(){
     const [ki, setKi] = useState('0');
     const [kd, setKd] = useState('0');
     const [integralLimit, setIntegralLimit] = useState('30');
-    const [updateStateInterval, setUpdateStateInterval] = useState(null);
-
+    const [isMotorControllerInitialized, setIsMotorControllerInitialized] = useState([false, false, false, false]);
+    const [isUpdateStateIntervalRunning, setIsUpdateStateIntervalRunning] = useState(false);
     const [motorControllerState, motorControllerStateUpdate] = useState({
         motor_index: 0,
         kp: 0,
@@ -30,6 +34,9 @@ function MotorControllerTab(){
 
     const handleMotorIndexChange = (event) => {
         setMotorIndex(event.target.value);
+        motorControllerChartRef.current.resetChart();
+        console.log(isMotorControllerInitialized);
+        setIsUpdateStateIntervalRunning(isMotorControllerInitialized[event.target.value]);
     };
 
     const handleMotorReversedChange = (event) => {
@@ -60,14 +67,21 @@ function MotorControllerTab(){
         setKd(event.target.value);
     };
 
+    const handleIntegralLimitChange = (event) => {
+        setIntegralLimit(event.target.value);
+    };
+
     // Initialize motor controller
     const initializeMotorControllerFunction = async () => {
         console.log(`Initializing motor controller`);
+        motorControllerChartRef.current.resetChart();
         await controller.initialize_motor_controller(motorIndex, isMotorReversed, encoderIndex, encoderResolution, kp, ki, kd, integralLimit);
         // start periodicly requesting motor controller state
-        setUpdateStateInterval(
-            setInterval(getControllerStateFunction, 500)
-        );
+        setIsUpdateStateIntervalRunning(true)
+        // Set corresponding motor controller initialized flag to true
+        let states = [...isMotorControllerInitialized];
+        states[motorIndex] = true;
+        setIsMotorControllerInitialized(states);
     };
 
     // Simulated function for setting motor speed
@@ -77,7 +91,7 @@ function MotorControllerTab(){
     };
 
     const getControllerStateFunction = async () => {
-        console.log(`Getting controller state`);
+        //console.log(`Getting controller state`);
         /*
         motor_index,
         kp,
@@ -94,13 +108,17 @@ function MotorControllerTab(){
         state.output = state.output / 10;
 
         motorControllerStateUpdate(state);
-        console.log(state);
+        //console.log(state);
     };
 
     // Stop motor controller
     const stopMotorControllerFunction = async () => {
         // Stop periodicly requesting motor controller state
-        clearInterval(updateStateInterval);
+        setIsUpdateStateIntervalRunning(false);
+        // Set corresponding motor controller initialized flag to false
+        let states = [...isMotorControllerInitialized];
+        states[motorIndex] = false;
+        setIsMotorControllerInitialized(states);
 
         // Set motor speed to 0
         setMotorSpeed(0);
@@ -113,9 +131,28 @@ function MotorControllerTab(){
     useEffect(() => {
         if (!isConnected) {
             setMotorSpeed(0);
-            clearInterval(updateStateInterval);
+            setIsUpdateStateIntervalRunning(false);
         }
     }, [isConnected]);
+
+    useEffect(() => {
+        if (isUpdateStateIntervalRunning) {
+          // Start the timer
+          updateStateIntervalId.current = setInterval(getControllerStateFunction, updateInterval);
+        } else {
+          // Stop the timer
+          if (updateStateIntervalId.current) {
+            clearInterval(updateStateIntervalId.current);
+          }
+        }
+    
+        // Cleanup function to clear the interval
+        return () => {
+          if (updateStateIntervalId.current) {
+            clearInterval(updateStateIntervalId.current);
+          }
+        };
+      }, [isUpdateStateIntervalRunning]);
 
     return (
         <div className='controllerTag w3-container container motor-controller-options'>
@@ -154,7 +191,7 @@ function MotorControllerTab(){
                     <label htmlFor='kd'>Kd:</label><br/>
                     <input type='text' id='kd' value={kd} onChange={handleKdChange}/><br/>
                     <label htmlFor='integralLimit'>Integral Limit:</label><br/>
-                    <input type='text' id='integralLimit' value={integralLimit} onChange={handleKdChange}/><br/>
+                    <input type='text' id='integralLimit' value={integralLimit} onChange={handleIntegralLimitChange}/><br/>
                 </div>
                 <p>
                     <button className='w3-button w3-blue' onClick={initializeMotorControllerFunction}>Initialize Motor Controller</button>
@@ -166,7 +203,7 @@ function MotorControllerTab(){
                 </p>
             </div>
             <div className='column'>
-            <MotorControllerChart motorControllerState = {motorControllerState}/>
+            <MotorControllerChart ref={motorControllerChartRef} motorControllerState = {motorControllerState}/>
             </div>
         </div>
     );
