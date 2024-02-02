@@ -5,12 +5,20 @@ The library is located in the `./src/commands` directory and the web client is l
 In order to run the web client simply open the `index.html` file from `.\src` in a web browser.\
 Discription of the commands can be found in [Kinisi Motion Controller framework documentation](https://raw.githubusercontent.com/szolotykh/kinisi-motor-controller-firmware/command-script/commands.md)
 
+## Run Controller client
+```
+npm install
+npm start
+```
+
 ## Updating command file
 To update the command file, run the following command:
 ```
-cd ./scripts
-python3 generate_commands.py
+cd ./tools
+pip install -r requirements.txt
+python update-commands.py --branch=main
 ```
+Where branch parameter is optional.\
 The script will generate a new file called `kinisi_commands.js` in the `./src/commands` directory.
 
 ## Links
