@@ -14,6 +14,7 @@ function MotorControllerTab(){
     const [kp, setKp] = useState('0.1');
     const [ki, setKi] = useState('0');
     const [kd, setKd] = useState('0');
+    const [integralLimit, setIntegralLimit] = useState('30');
     const [updateStateInterval, setUpdateStateInterval] = useState(null);
 
     const [motorControllerState, motorControllerStateUpdate] = useState({
@@ -62,7 +63,7 @@ function MotorControllerTab(){
     // Initialize motor controller
     const initializeMotorControllerFunction = async () => {
         console.log(`Initializing motor controller`);
-        await controller.initialize_motor_controller(motorIndex, isMotorReversed, encoderIndex, encoderResolution, kp, ki, kd);
+        await controller.initialize_motor_controller(motorIndex, isMotorReversed, encoderIndex, encoderResolution, kp, ki, kd, integralLimit);
         // start periodicly requesting motor controller state
         setUpdateStateInterval(
             setInterval(getControllerStateFunction, 500)
@@ -152,18 +153,20 @@ function MotorControllerTab(){
                     <input type='text' id='ki' value={ki} onChange={handleKiChange}/><br/>
                     <label htmlFor='kd'>Kd:</label><br/>
                     <input type='text' id='kd' value={kd} onChange={handleKdChange}/><br/>
+                    <label htmlFor='integralLimit'>Integral Limit:</label><br/>
+                    <input type='text' id='integralLimit' value={integralLimit} onChange={handleKdChange}/><br/>
                 </div>
                 <p>
                     <button className='w3-button w3-blue' onClick={initializeMotorControllerFunction}>Initialize Motor Controller</button>
                     <label htmlFor='motorSpeed'>Speed (radian/sec):</label>
-                    <input className='' type='range' min='-8' max='8' step='0.1' value={motorSpeed} id='motorSpeed' onChange={handleMotorSpeedChange}/>
+                    <input className='' type='range' min='-8' max='8' step='0.5' value={motorSpeed} id='motorSpeed' onChange={handleMotorSpeedChange}/>
                     <button className='w3-button w3-blue' onClick={setMotorSpeedFunction}>Set motor Speed</button>
                     <button className='w3-button w3-blue' onClick={getControllerStateFunction}>GetControllerState</button>
                     <button className='w3-button w3-blue' onClick={stopMotorControllerFunction}>Stop Controller</button>
                 </p>
             </div>
             <div className='column'>
-                <MotorControllerChart motorControllerState = {motorControllerState}/>
+            <MotorControllerChart motorControllerState = {motorControllerState}/>
             </div>
         </div>
     );
