@@ -3,7 +3,7 @@ import { ControllerContext } from '../../contexts/ControllerContext';
 import './PlatformTab.css';
 
 function PlatformTab() {
-    const { controller } = useContext(ControllerContext);
+    const { controller, isConnected} = useContext(ControllerContext);
 
     // States for platform type and settings
     const [platformType, setPlatformType] = useState('omni');
@@ -12,6 +12,15 @@ function PlatformTab() {
         omni: [false, false, false]
     });
     const [velocity, setVelocity] = useState({ x: 0, y: 0, t: 0 });
+
+    // States for PID settings
+    const [encoderResolution, setEncoderResolution] = useState('537.7');
+    const [kp, setKp] = useState('0.1');
+    const [ki, setKi] = useState('0');
+    const [kd, setKd] = useState('0');
+    const [integralLimit, setIntegralLimit] = useState('30');
+
+    const [velocityTarget, setVelocityTarget] = useState({ x: 0, y: 0, t: 0 });
 
     // Handlers for changes in form elements
     const handlePlatformTypeChange = (event) => {
@@ -27,6 +36,34 @@ function PlatformTab() {
 
     const handleVelocityChange = (axis) => (event) => {
         setVelocity(prevState => ({ ...prevState, [axis]: event.target.value }));
+    };
+
+    const handleEncoderResolutionChange = (event) => {
+        setEncoderResolution(event.target.value);
+    };
+
+    const handleKpChange = (event) => {
+        setKp(event.target.value);
+    };
+
+    const handleKiChange = (event) => {
+        setKi(event.target.value);
+    };
+
+    const handleKdChange = (event) => {
+        setKd(event.target.value);
+    };
+
+    const handleIntegralLimitChange = (event) => {
+        setIntegralLimit(event.target.value);
+    };
+
+    const initializePlatformController = async () => {
+        controller.set_platform_controller(kp, ki, kd, encoderResolution, integralLimit);
+    };
+
+    const handleVelocityTargetChange = (axis) => (event) => {
+        controller.setVelocityTarget(prevState => ({ ...prevState, [axis]: event.target.value }));
     };
 
     // Handler for initializing the platform
@@ -47,94 +84,125 @@ function PlatformTab() {
         await controller.set_platform_velocity_input(velocity.x, velocity.y, velocity.t);
     };
 
+    const setVelocityTargetHandler = async () => {
+        console.log(`Setting platform velocity target to X:${velocityTarget.x}, Y:${velocityTarget.y}, T:${velocityTarget.t}`);
+        await controller.set_platform_target_velocity(velocityTarget.x, velocityTarget.y, velocityTarget.t);
+    }
+
     return (
-        <div id="tabPlatform" className="platform-tab controllerTab w3-panel">
-            <label htmlFor="platformSelector">Platform:</label>
-            <select id="platformSelector" value={platformType} onChange={handlePlatformTypeChange}>
-                <option value="mecanum">Mecanum Platform</option>
-                <option value="omni">Omni Platform</option>
-            </select>
+        <div id="tabPlatform" className="platform-tab controllerTab w3-row container">
+            <div className='w3-col m4 l2'>
+                <h2>Platform Settings</h2>
+                <label htmlFor="platformSelector">Platform:</label>
+                <select id="platformSelector" value={platformType} onChange={handlePlatformTypeChange}>
+                    <option value="mecanum">Mecanum Platform</option>
+                    <option value="omni">Omni Platform</option>
+                </select>
 
-            {platformType === 'mecanum' && (
-                <div id="mecanumPlatform">
-                    <h2>Mecanum Platform</h2>
-                    <div>
-                        Motor setup (is reversed):<br/>
-                        {Array.from({ length: 4 }).map((_, index) => (
-                            <React.Fragment key={index}>
-                                <span className='span-check'>
-                                    <label htmlFor={`mecanumPlatformIsReverse${index}`}>{index} </label>
-                                    <input
-                                        type="checkbox"
-                                        className='w3-check'
-                                        id={`mecanumPlatformIsReverse${index}`} 
-                                        checked={isReversed.mecanum[index]} 
-                                        onChange={handleReverseChange('mecanum', index)}
-                                    />
-                                </span>
-                            </React.Fragment>
-                        ))}
+                {platformType === 'mecanum' && (
+                    <div id="mecanumPlatform">
+                        <h2>Mecanum Platform</h2>
+                        <div>
+                            Motor setup (is reversed):<br/>
+                            {Array.from({ length: 4 }).map((_, index) => (
+                                <React.Fragment key={index}>
+                                    <span className='span-check'>
+                                        <label className="checkbox-label" htmlFor={`mecanumPlatformIsReverse${index}`}>{index} </label>
+                                        <input
+                                            type="checkbox"
+                                            className='w3-check'
+                                            id={`mecanumPlatformIsReverse${index}`} 
+                                            checked={isReversed.mecanum[index]} 
+                                            onChange={handleReverseChange('mecanum', index)}
+                                        />
+                                    </span>
+                                </React.Fragment>
+                            ))}
+                        </div>
+                        <button className='w3-button w3-blue' onClick={() => initializePlatform('mecanum')}>Initialize</button><br/>
                     </div>
-                    <button className='w3-button w3-blue' onClick={() => initializePlatform('mecanum')}>Initialize</button><br/>
-                </div>
-            )}
+                )}
 
-            {platformType === 'omni' && (
-                <div id="omniPlatform">
-                    <h2>Omni Platform</h2>
-                    <div>
-                        Motor setup (is reversed):<br/>
-                        {Array.from({ length: 3 }).map((_, index) => (
-                            <React.Fragment key={index}>
-                                <span className='span-check'>
-                                    <label htmlFor={`omniPlatformIsReverse${index}`}>{index} </label>
-                                    <input 
-                                        type="checkbox"
-                                        className='w3-check'
-                                        id={`omniPlatformIsReverse${index}`} 
-                                        checked={isReversed.omni[index]} 
-                                        onChange={handleReverseChange('omni', index)}
-                                    />
-                                </span>
-                            </React.Fragment>
-                        ))}
+                {platformType === 'omni' && (
+                    <div id="omniPlatform">
+                        <h2>Omni Platform</h2>
+                        <div>
+                            Motor setup (is reversed):<br/>
+                            {Array.from({ length: 3 }).map((_, index) => (
+                                <React.Fragment key={index}>
+                                    <span className='span-check'>
+                                        <label className="checkbox-label" htmlFor={`omniPlatformIsReverse${index}`}>{index} </label>
+                                        <input 
+                                            type="checkbox"
+                                            className='w3-check'
+                                            id={`omniPlatformIsReverse${index}`} 
+                                            checked={isReversed.omni[index]} 
+                                            onChange={handleReverseChange('omni', index)}
+                                        />
+                                    </span>
+                                </React.Fragment>
+                            ))}
+                        </div>
+                        <button className='w3-button w3-blue' onClick={() => initializePlatform('omni')}>Initialize</button><br/>
                     </div>
-                    <button className='w3-button w3-blue' onClick={() => initializePlatform('omni')}>Initialize</button><br/>
-                </div>
-            )}
+                )}
 
-            <div>
-                <label htmlFor="platformVelocityX">X</label>
-                <input 
-                    type="range" 
-                    min="-100" 
-                    max="100" 
-                    value={velocity.x} 
-                    step="10" 
-                    id="platformVelocityX" 
-                    onChange={handleVelocityChange('x')}
-                />
-                <label htmlFor="platformVelocityY">Y</label>
-                <input 
-                    type="range" 
-                    min="-100" 
-                    max="100" 
-                    value={velocity.y} 
-                    step="10" 
-                    id="platformVelocityY" 
-                    onChange={handleVelocityChange('y')}
-                />
-                <label htmlFor="platformVelocityT">T</label>
-                <input 
-                    type="range" 
-                    min="-100" 
-                    max="100" 
-                    value={velocity.t} 
-                    step="10" 
-                    id="platformVelocityT" 
-                    onChange={handleVelocityChange('t')}
-                />
-                <button className='w3-button w3-blue' onClick={setPlatformVelocity}>Set Platform Velocity</button><br/>
+                <div>
+                    <label htmlFor="platformVelocityX">X [-100.0 to 100.0]</label>
+                    <input 
+                        type="range" 
+                        min="-100" 
+                        max="100" 
+                        value={velocity.x} 
+                        step="10" 
+                        id="platformVelocityX" 
+                        onChange={handleVelocityChange('x')}
+                    />
+                    <label htmlFor="platformVelocityY">Y [-100.0 to 100.0]</label>
+                    <input 
+                        type="range" 
+                        min="-100" 
+                        max="100" 
+                        value={velocity.y} 
+                        step="10" 
+                        id="platformVelocityY" 
+                        onChange={handleVelocityChange('y')}
+                    />
+                    <label htmlFor="platformVelocityT">T [-100.0 to 100.0]</label>
+                    <input 
+                        type="range" 
+                        min="-100" 
+                        max="100" 
+                        value={velocity.t} 
+                        step="10" 
+                        id="platformVelocityT" 
+                        onChange={handleVelocityChange('t')}
+                    />
+                    <button className='w3-button w3-blue' onClick={setPlatformVelocity}>Set Platform Velocity</button>
+                </div>
+            </div>
+            <div className='w3-col m4 l2'>
+                <h2>Controller Settings</h2>
+                <label htmlFor='encoderResolution'>Encoder Resolution (tickes/second):</label>
+                <input type='text' id='encoderResolution' value={encoderResolution} onChange={handleEncoderResolutionChange}/>
+                <label htmlFor='kp'>Kp:</label>
+                <input type='text' id='kp' value={kp} onChange={handleKpChange}/>
+                <label htmlFor='ki'>Ki:</label>
+                <input type='text' id='ki' value={ki} onChange={handleKiChange}/>
+                <label htmlFor='kd'>Kd:</label>
+                <input type='text' id='kd' value={kd} onChange={handleKdChange}/>
+                <label htmlFor='integralLimit'>Integral Limit:</label>
+                <input type='text' id='integralLimit' value={integralLimit} onChange={handleIntegralLimitChange}/>
+                <button className='w3-button w3-blue' onClick={initializePlatformController}>Initialize Platform Controller</button>
+
+                <label htmlFor="platformVelocityTargetX">X (m/s)</label>
+                <input type="number" id="platformVelocityTargetX" step={0.1} value={velocityTarget.x} onChange={handleVelocityTargetChange('x')}/>
+                <label htmlFor="platformVelocityTargetY">Y (m/s)</label>
+                <input type="number" id="platformVelocityTargetY" step={0.1} value={velocityTarget.y} onChange={handleVelocityTargetChange('y')}/>
+                <label htmlFor="platformVelocityTargetT">T (radian/s)</label>
+                <input type="number" id="platformVelocityTargetT" step={0.1} value={velocityTarget.t} onChange={handleVelocityTargetChange('t')}/>
+
+                <button className='w3-button w3-blue' onClick={setVelocityTargetHandler}>Set Platform Velocity Target</button>
             </div>
         </div>
     );
