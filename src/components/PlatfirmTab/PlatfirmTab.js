@@ -11,6 +11,17 @@ function PlatformTab() {
         mecanum: [false, false, false, false],
         omni: [false, false, false]
     });
+
+    // Mecanum platform properties
+    const [mecanumWheelDiameter, setMecanumWheelDiameter] = useState(0.1);
+    const [mecanumLength, setMecanumLength] = useState(0.5);
+    const [mecanumWidth, setMecanumWidth] = useState(0.5);
+
+    // Omni platform properties
+    const [omniWheelDiameter, setOmniWheelDiameter] = useState(0.1);
+    const [omniRadius, setOmniRadius] = useState(0.15);
+
+
     const [velocity, setVelocity] = useState({ x: 0, y: 0, t: 0 });
 
     // States for PID settings
@@ -34,6 +45,26 @@ function PlatformTab() {
         }));
     };
 
+    const handleMecanumWheelDiameterChange = (event) => {
+        setMecanumWheelDiameter(event.target.value);
+    };
+
+    const handleMecanumLengthChange = (event) => {
+        setMecanumLength(event.target.value);
+    };
+
+    const handleMecanumWidthChange = (event) => {
+        setMecanumWidth(event.target.value);
+    };
+
+    const handleOmniWheelDiameterChange = (event) => {
+        setOmniWheelDiameter(event.target.value);
+    };
+
+    const handleOmniRadiusChange = (event) => {
+        setOmniRadius(event.target.value);
+    };
+
     const handleVelocityChange = (axis) => (event) => {
         setVelocity(prevState => ({ ...prevState, [axis]: event.target.value }));
     };
@@ -54,6 +85,10 @@ function PlatformTab() {
         setKd(event.target.value);
     };
 
+    const handleVelocityTargetChange = (axis) => (event) => {
+        setVelocityTarget({ ...velocityTarget, [axis]: event.target.value });
+    };
+
     const handleIntegralLimitChange = (event) => {
         setIntegralLimit(event.target.value);
     };
@@ -62,17 +97,26 @@ function PlatformTab() {
         controller.set_platform_controller(kp, ki, kd, encoderResolution, integralLimit);
     };
 
-    const handleVelocityTargetChange = (axis) => (event) => {
-        controller.setVelocityTarget(prevState => ({ ...prevState, [axis]: event.target.value }));
-    };
 
     // Handler for initializing the platform
     const initializePlatform = async (platform) => {
         console.log(`Initializing ${platform} platform with reversed motors: ${isReversed[platform]}`);
         if (platformType === 'mecanum'){
-            await controller.initialize_mecanum_platform(isReversed.mecanum[0], isReversed.mecanum[1], isReversed.mecanum[2], isReversed.mecanum[3]);
+            await controller.initialize_mecanum_platform(
+                isReversed.mecanum[0],
+                isReversed.mecanum[1],
+                isReversed.mecanum[2],
+                isReversed.mecanum[3],
+                mecanumLength,
+                mecanumWidth,
+                mecanumWheelDiameter);
         } else if (platformType === 'omni'){
-            await controller.initialize_omni_platform(isReversed.omni[0], isReversed.omni[1], isReversed.omni[2], 1, 1);
+            await controller.initialize_omni_platform(
+                isReversed.omni[0],
+                isReversed.omni[1],
+                isReversed.omni[2],
+                omniWheelDiameter,
+                omniRadius);
         }else{
             console.log("Invalid platform type");
         }
@@ -81,7 +125,7 @@ function PlatformTab() {
     // Handler for setting the platform velocity
     const setPlatformVelocity = async () => {
         console.log(`Setting platform velocity to X:${velocity.x}, Y:${velocity.y}, T:${velocity.t}`);
-        await controller.set_platform_velocity_input(velocity.x, velocity.y, velocity.t);
+        await controller.set_platform_velocity(velocity.x, velocity.y, velocity.t);
     };
 
     const setVelocityTargetHandler = async () => {
@@ -119,7 +163,13 @@ function PlatformTab() {
                                 </React.Fragment>
                             ))}
                         </div>
-                        <button className='w3-button w3-blue' onClick={() => initializePlatform('mecanum')}>Initialize</button><br/>
+                        <label htmlFor='mecanum_wheel_diameter'>Wheels Diameter (meters)</label>
+                        <input type='number' id='mecanum_wheel_diameter' value={mecanumWheelDiameter} onChange={handleMecanumWheelDiameterChange}/>
+                        <label htmlFor='mecanum_length'>Platform length (meters)</label>
+                        <input type='number' id='mecanum_length' value={mecanumLength} onChange={handleMecanumLengthChange}/>
+                        <label htmlFor='mecanum_width'>Platform width (meters)</label>
+                        <input type='number' id='mecanum_width' value={mecanumWidth} onChange={handleMecanumWidthChange}/>
+                    <button className='w3-button w3-blue' onClick={() => initializePlatform('mecanum')}>Initialize</button><br/>
                     </div>
                 )}
 
@@ -143,6 +193,10 @@ function PlatformTab() {
                                 </React.Fragment>
                             ))}
                         </div>
+                        <label htmlFor='omni_wheel_diameter'>Wheels Diameter (meters)</label>
+                        <input type='number' id='omni_wheel_diameter' value={omniWheelDiameter} onChange={handleOmniWheelDiameterChange}/>
+                        <label htmlFor='omni_radius'>Platform radius (meters)</label>
+                        <input type='number' id='omni_radius' value={omniRadius} onChange={handleOmniRadiusChange}/>
                         <button className='w3-button w3-blue' onClick={() => initializePlatform('omni')}>Initialize</button><br/>
                     </div>
                 )}
