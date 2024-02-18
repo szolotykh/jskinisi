@@ -25,13 +25,17 @@ function PlatformTab() {
     const [velocity, setVelocity] = useState({ x: 0, y: 0, t: 0 });
 
     // States for PID settings
-    const [encoderResolution, setEncoderResolution] = useState('537.7');
+    const [encoderResolution, setEncoderResolution] = useState('1992.6');
     const [kp, setKp] = useState('0.1');
     const [ki, setKi] = useState('0');
     const [kd, setKd] = useState('0');
     const [integralLimit, setIntegralLimit] = useState('30');
 
     const [velocityTarget, setVelocityTarget] = useState({ x: 0, y: 0, t: 0 });
+
+    // Odometry
+    const [isOdometryInitialized, setIsOdometryInitialized] = useState(false);
+    const [odometry, setOdometry] = useState({ x: 0, y: 0, t: 0 });
 
     // Handlers for changes in form elements
     const handlePlatformTypeChange = (event) => {
@@ -97,6 +101,28 @@ function PlatformTab() {
         controller.set_platform_controller(kp, ki, kd, encoderResolution, integralLimit);
     };
 
+    const handleOdometryStart = async () => {
+        await controller.start_platform_odometry();
+        console.log('Odometry initialized');
+        setIsOdometryInitialized(true);
+    };
+
+    const handleOdometryStop = async () => {
+        await controller.stop_platform_odometry();
+        console.log('Odometry stopped');
+        setIsOdometryInitialized(false);
+    };
+
+    const handleOdometryReset = async () => {
+        await controller.reset_platform_odometry();
+        console.log('Odometry reset');
+    };
+
+    const handleGetOdometry = async () => {
+        const odometry = await controller.get_platform_odometry();
+        console.log('Odometry:', odometry);
+        setOdometry(odometry);
+    };
 
     // Handler for initializing the platform
     const initializePlatform = async (platform) => {
@@ -238,15 +264,15 @@ function PlatformTab() {
             <div className='w3-col m4 l2'>
                 <h2>Controller Settings</h2>
                 <label htmlFor='encoderResolution'>Encoder Resolution (tickes/second):</label>
-                <input type='text' id='encoderResolution' value={encoderResolution} onChange={handleEncoderResolutionChange}/>
+                <input type='number' id='encoderResolution' value={encoderResolution} onChange={handleEncoderResolutionChange}/>
                 <label htmlFor='kp'>Kp:</label>
-                <input type='text' id='kp' value={kp} onChange={handleKpChange}/>
+                <input type='number' id='kp' value={kp} onChange={handleKpChange}/>
                 <label htmlFor='ki'>Ki:</label>
-                <input type='text' id='ki' value={ki} onChange={handleKiChange}/>
+                <input type='number' id='ki' value={ki} onChange={handleKiChange}/>
                 <label htmlFor='kd'>Kd:</label>
-                <input type='text' id='kd' value={kd} onChange={handleKdChange}/>
+                <input type='number' id='kd' value={kd} onChange={handleKdChange}/>
                 <label htmlFor='integralLimit'>Integral Limit:</label>
-                <input type='text' id='integralLimit' value={integralLimit} onChange={handleIntegralLimitChange}/>
+                <input type='number' id='integralLimit' value={integralLimit} onChange={handleIntegralLimitChange}/>
                 <button className='w3-button w3-blue' onClick={initializePlatformController}>Initialize Platform Controller</button>
 
                 <label htmlFor="platformVelocityTargetX">X (m/s)</label>
@@ -257,6 +283,14 @@ function PlatformTab() {
                 <input type="number" id="platformVelocityTargetT" step={0.1} value={velocityTarget.t} onChange={handleVelocityTargetChange('t')}/>
 
                 <button className='w3-button w3-blue' onClick={setVelocityTargetHandler}>Set Platform Velocity Target</button>
+            </div>
+            <div className='w3-col m4 l2'>
+                <h2>Odometry</h2>
+                <button className='w3-button w3-blue' onClick={() => handleOdometryStart()} disabled={isOdometryInitialized}>Start Odometry</button>
+                <button className='w3-button w3-blue' onClick={() => handleOdometryReset()} disabled={!isOdometryInitialized}>Reset Odometry</button>
+                <button className='w3-button w3-blue' onClick={() => handleOdometryStop()} disabled={!isOdometryInitialized}>Stop Odometry</button>
+                <button className='w3-button w3-blue' onClick={() => handleGetOdometry()}>Get Odometry</button>
+                <p>Odometry: X: {odometry.x.toFixed(2)}, Y: {odometry.y.toFixed(2)}, Theta: {odometry.t.toFixed(2)}</p>
             </div>
         </div>
     );

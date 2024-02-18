@@ -11,9 +11,11 @@ function MotorTab(){
     const [motorSpeed, setMotorSpeed] = useState(0);
     const [encoderIndex, setEncoderIndex] = useState('0');
     const [encoderValue, setEncoderValue] = useState('');
-    const [encoderResolution, setEncoderResolution] = useState([537.7, 537.7, 537.7, 537.7]);
+    const [encoderResolution, setEncoderResolution] = useState([1992.6, 1992.6, 1992.6, 1992.6]);
     const [isEncoderInitialized, setIsEncoderInitialized] = useState([false, false, false, false]);
     const [isEncoderReversed, setIsEncoderReversed] = useState([false, false, false, false]);
+    const [isOdometryStarted, setIsOdometryStarted] = useState([false, false, false, false]);
+    const [encoderOdometry, setEncoderOdometry] = useState([0, 0, 0, 0]);
 
     const handleMotorIndexChange = (event) => {
         setMotorIndex(event.target.value);
@@ -80,6 +82,30 @@ function MotorTab(){
         console.log(`Encoder ${encoderIndex} value: ${value}`);
     };
 
+    const startOdometryFunction = async () => {
+        console.log(`Starting odometry. Encoder ${encoderIndex}`);
+        setIsOdometryStarted({ ...isOdometryStarted, [encoderIndex]: true });
+        await controller.start_encoder_odometry(encoderIndex);
+    }
+
+    const resetOdometryFunction = async () => {
+        console.log(`Resetting odometry. Encoder ${encoderIndex}`);
+        await controller.reset_encoder_odometry(encoderIndex);
+    }
+
+    const getOdometryFunction = async () => {
+        console.log(`Getting odometry. Encoder ${encoderIndex}`);
+        var value = await controller.get_encoder_odometry(encoderIndex);
+        setEncoderOdometry({ ...encoderOdometry, [encoderIndex]: value });
+        console.log(`Odometry: ${value}`);
+    }
+
+    const stopOdometryFunction = async () => {
+        console.log(`Stopping odometry. Encoder ${encoderIndex}`);
+        await controller.stop_encoder_odometry(encoderIndex);
+        setIsOdometryStarted({ ...isOdometryStarted, [encoderIndex]: false });
+    }
+
     return (
         <div className='motor-tab controllerTag w3-container'>
             {/* Motor Controls */}
@@ -123,6 +149,17 @@ function MotorTab(){
                 <button className='w3-button w3-blue' onClick={initializeEncoderFunction}>Initialize encoder</button>
                 <button className='w3-button w3-blue' onClick={getEncoderValueFunction}>Get Encoder Value</button>
                 <div id='encoderValue'>{encoderValue}</div>
+            </div>
+            
+            {/* Odometry */}
+            <div className={!isEncoderInitialized[encoderIndex] ? 'disabled-div' : ''}>
+                <button className='w3-button w3-blue' onClick={startOdometryFunction}>Start Odometry</button>
+                <div className={!isOdometryStarted[encoderIndex] ? 'disabled-div' : ''}> 
+                    <button className='w3-button w3-blue' onClick={resetOdometryFunction}>Reset Odometry</button>
+                    <button className='w3-button w3-blue' onClick={stopOdometryFunction}>Stop Odometry</button>
+                    <button className='w3-button w3-blue' onClick={getOdometryFunction}>Get Odometry</button>
+                    <div>{encoderOdometry[encoderIndex]}</div>
+                </div>
             </div>
         </div>
     );
