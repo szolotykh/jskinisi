@@ -103,8 +103,13 @@ function PlatformTab() {
     };
 
     const initializePlatformController = async () => {
-        controller.set_platform_controller(kp, ki, kd, integralLimit);
+        controller.start_platform_controller(kp, ki, kd, integralLimit);
         setIsControllerInitialized(true);
+    };
+
+    const handlePlatforControllerStop = async () => {
+        await controller.stop_platform_controller();
+        setIsControllerInitialized(false);
     };
 
     const handleOdometryStart = async () => {
@@ -290,6 +295,7 @@ function PlatformTab() {
                     <button className='w3-button w3-blue' onClick={initializePlatformController}>Initialize Platform Controller</button>
 
                     <div className={!isControllerInitialized ? 'disabled-div' : ''}>
+                    <button className='w3-button w3-blue' onClick={handlePlatforControllerStop} disabled={!isControllerInitialized}>Stop Platform Controller</button>
                         <label htmlFor="platformVelocityTargetX">X (m/s)</label>
                         <input type="number" id="platformVelocityTargetX" step={0.1} value={velocityTarget.x} onChange={handleVelocityTargetChange('x')}/>
                         <label htmlFor="platformVelocityTargetY">Y (m/s)</label>
