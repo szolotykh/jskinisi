@@ -9,14 +9,20 @@ function Connection() {
     };
 
     const onDisconnect = async () => {
+        console.log('Disconnecting...');
+        await controller.stop_platform_controller();
+        
         for (var i = 0; i < 4; i++) {
             await controller.delete_motor_controller(i);
         }
+
         for (var i = 0; i < 4; i++) {
             await controller.stop_motor(i);
         }
+
         await controller.disconnect();
         setIsConnected(false);
+        console.log('Disconnected');
     };
 
     return (
