@@ -1,6 +1,7 @@
 import React, { useState, Children, useContext } from 'react';
 import { ControllerContext } from '../../contexts/ControllerContext';
 import './Tabs.css';
+import '../Common.css';
 
 function TabContainer({ children }) {
     const [activeTab, setActiveTab] = useState(0);

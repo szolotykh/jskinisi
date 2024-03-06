@@ -249,12 +249,12 @@ def generate_js_code(commands_data, js_verson = ""):
         result += f"export {{{exports}}}"
     return result
 
-# Generate python code from the commands from the input JSON file
-# input_json_path: Path to the input JSON file containing command definitions.
+# Generate javascript code from the input JSON file.
+# path: Path to the input JSON file containing command definitions.
 # output_path: Path to the output file.
-def generate(input_json_path, output_path, js_verson = ""):
+def generate(path, output_path, js_verson = ""):
     try:
-        with open(input_json_path, 'r') as file:
+        with open(path, 'r') as file:
             commands_data = json.load(file)
     except json.JSONDecodeError:
         print("Error: Could not decode the input JSON file.")

@@ -1,9 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { ControllerContext } from '../../contexts/ControllerContext';
 import './PlatformTab.css';
+import '../Common.css'
 
 function PlatformTab() {
     const { controller, isConnected} = useContext(ControllerContext);
+
+    const [isPlatformInitialized, setIsPlatformInitialized] = useState(false);
 
     // States for platform type and settings
     const [platformType, setPlatformType] = useState('omni');
@@ -24,14 +27,20 @@ function PlatformTab() {
 
     const [velocity, setVelocity] = useState({ x: 0, y: 0, t: 0 });
 
-    // States for PID settings
-    const [encoderResolution, setEncoderResolution] = useState('537.7');
+    // Controller settings
+    const [isControllerInitialized, setIsControllerInitialized] = useState(false);
+
+    const [encoderResolution, setEncoderResolution] = useState('1992.6');
     const [kp, setKp] = useState('0.1');
     const [ki, setKi] = useState('0');
     const [kd, setKd] = useState('0');
     const [integralLimit, setIntegralLimit] = useState('30');
 
     const [velocityTarget, setVelocityTarget] = useState({ x: 0, y: 0, t: 0 });
+
+    // Odometry
+    const [isOdometryInitialized, setIsOdometryInitialized] = useState(false);
+    const [odometry, setOdometry] = useState({ x: 0, y: 0, t: 0 });
 
     // Handlers for changes in form elements
     const handlePlatformTypeChange = (event) => {
@@ -94,9 +103,37 @@ function PlatformTab() {
     };
 
     const initializePlatformController = async () => {
-        controller.set_platform_controller(kp, ki, kd, encoderResolution, integralLimit);
+        controller.start_platform_controller(kp, ki, kd, integralLimit);
+        setIsControllerInitialized(true);
     };
 
+    const handlePlatforControllerStop = async () => {
+        await controller.stop_platform_controller();
+        setIsControllerInitialized(false);
+    };
+
+    const handleOdometryStart = async () => {
+        await controller.start_platform_odometry();
+        console.log('Odometry initialized');
+        setIsOdometryInitialized(true);
+    };
+
+    const handleOdometryStop = async () => {
+        await controller.stop_platform_odometry();
+        console.log('Odometry stopped');
+        setIsOdometryInitialized(false);
+    };
+
+    const handleOdometryReset = async () => {
+        await controller.reset_platform_odometry();
+        console.log('Odometry reset');
+    };
+
+    const handleGetOdometry = async () => {
+        const odometry = await controller.get_platform_odometry();
+        console.log('Odometry:', odometry);
+        setOdometry(odometry);
+    };
 
     // Handler for initializing the platform
     const initializePlatform = async (platform) => {
@@ -109,17 +146,22 @@ function PlatformTab() {
                 isReversed.mecanum[3],
                 mecanumLength,
                 mecanumWidth,
-                mecanumWheelDiameter);
+                mecanumWheelDiameter,
+                encoderResolution);
         } else if (platformType === 'omni'){
             await controller.initialize_omni_platform(
                 isReversed.omni[0],
                 isReversed.omni[1],
                 isReversed.omni[2],
                 omniWheelDiameter,
-                omniRadius);
+                omniRadius,
+                encoderResolution);
         }else{
             console.log("Invalid platform type");
+            return
         }
+
+        setIsPlatformInitialized(true);
     };
 
     // Handler for setting the platform velocity
@@ -169,7 +211,9 @@ function PlatformTab() {
                         <input type='number' id='mecanum_length' value={mecanumLength} onChange={handleMecanumLengthChange}/>
                         <label htmlFor='mecanum_width'>Platform width (meters)</label>
                         <input type='number' id='mecanum_width' value={mecanumWidth} onChange={handleMecanumWidthChange}/>
-                    <button className='w3-button w3-blue' onClick={() => initializePlatform('mecanum')}>Initialize</button><br/>
+                        <label htmlFor='encoderResolution'>Encoder Resolution (tickes/second):</label>
+                        <input type='number' id='encoderResolution' value={encoderResolution} onChange={handleEncoderResolutionChange}/>
+                        <button className='w3-button w3-blue' onClick={() => initializePlatform('mecanum')}>Initialize</button><br/>
                     </div>
                 )}
 
@@ -197,11 +241,13 @@ function PlatformTab() {
                         <input type='number' id='omni_wheel_diameter' value={omniWheelDiameter} onChange={handleOmniWheelDiameterChange}/>
                         <label htmlFor='omni_radius'>Platform radius (meters)</label>
                         <input type='number' id='omni_radius' value={omniRadius} onChange={handleOmniRadiusChange}/>
+                        <label htmlFor='encoderResolution'>Encoder Resolution (tickes/second):</label>
+                        <input type='number' id='encoderResolution' value={encoderResolution} onChange={handleEncoderResolutionChange}/>
                         <button className='w3-button w3-blue' onClick={() => initializePlatform('omni')}>Initialize</button><br/>
                     </div>
                 )}
 
-                <div>
+                <div className={!isPlatformInitialized ? 'disabled-div' : ''}>
                     <label htmlFor="platformVelocityX">X [-100.0 to 100.0]</label>
                     <input 
                         type="range" 
@@ -237,26 +283,39 @@ function PlatformTab() {
             </div>
             <div className='w3-col m4 l2'>
                 <h2>Controller Settings</h2>
-                <label htmlFor='encoderResolution'>Encoder Resolution (tickes/second):</label>
-                <input type='text' id='encoderResolution' value={encoderResolution} onChange={handleEncoderResolutionChange}/>
-                <label htmlFor='kp'>Kp:</label>
-                <input type='text' id='kp' value={kp} onChange={handleKpChange}/>
-                <label htmlFor='ki'>Ki:</label>
-                <input type='text' id='ki' value={ki} onChange={handleKiChange}/>
-                <label htmlFor='kd'>Kd:</label>
-                <input type='text' id='kd' value={kd} onChange={handleKdChange}/>
-                <label htmlFor='integralLimit'>Integral Limit:</label>
-                <input type='text' id='integralLimit' value={integralLimit} onChange={handleIntegralLimitChange}/>
-                <button className='w3-button w3-blue' onClick={initializePlatformController}>Initialize Platform Controller</button>
+                <div className={!isPlatformInitialized ? 'disabled-div' : ''}>
+                    <label htmlFor='kp'>Kp:</label>
+                    <input type='number' id='kp' value={kp} onChange={handleKpChange}/>
+                    <label htmlFor='ki'>Ki:</label>
+                    <input type='number' id='ki' value={ki} onChange={handleKiChange}/>
+                    <label htmlFor='kd'>Kd:</label>
+                    <input type='number' id='kd' value={kd} onChange={handleKdChange}/>
+                    <label htmlFor='integralLimit'>Integral Limit:</label>
+                    <input type='number' id='integralLimit' value={integralLimit} onChange={handleIntegralLimitChange}/>
+                    <button className='w3-button w3-blue' onClick={initializePlatformController}>Initialize Platform Controller</button>
 
-                <label htmlFor="platformVelocityTargetX">X (m/s)</label>
-                <input type="number" id="platformVelocityTargetX" step={0.1} value={velocityTarget.x} onChange={handleVelocityTargetChange('x')}/>
-                <label htmlFor="platformVelocityTargetY">Y (m/s)</label>
-                <input type="number" id="platformVelocityTargetY" step={0.1} value={velocityTarget.y} onChange={handleVelocityTargetChange('y')}/>
-                <label htmlFor="platformVelocityTargetT">T (radian/s)</label>
-                <input type="number" id="platformVelocityTargetT" step={0.1} value={velocityTarget.t} onChange={handleVelocityTargetChange('t')}/>
+                    <div className={!isControllerInitialized ? 'disabled-div' : ''}>
+                    <button className='w3-button w3-blue' onClick={handlePlatforControllerStop} disabled={!isControllerInitialized}>Stop Platform Controller</button>
+                        <label htmlFor="platformVelocityTargetX">X (m/s)</label>
+                        <input type="number" id="platformVelocityTargetX" step={0.1} value={velocityTarget.x} onChange={handleVelocityTargetChange('x')}/>
+                        <label htmlFor="platformVelocityTargetY">Y (m/s)</label>
+                        <input type="number" id="platformVelocityTargetY" step={0.1} value={velocityTarget.y} onChange={handleVelocityTargetChange('y')}/>
+                        <label htmlFor="platformVelocityTargetT">T (radian/s)</label>
+                        <input type="number" id="platformVelocityTargetT" step={0.1} value={velocityTarget.t} onChange={handleVelocityTargetChange('t')}/>
 
-                <button className='w3-button w3-blue' onClick={setVelocityTargetHandler}>Set Platform Velocity Target</button>
+                        <button className='w3-button w3-blue' onClick={setVelocityTargetHandler}>Set Platform Velocity Target</button>
+                    </div>
+                </div>
+            </div>
+            <div className='w3-col m4 l2'>
+                <h2>Odometry</h2>
+                    <div className={!isPlatformInitialized ? 'disabled-div' : ''}>
+                    <button className='w3-button w3-blue' onClick={() => handleOdometryStart()} disabled={isOdometryInitialized}>Start Odometry</button>
+                    <button className='w3-button w3-blue' onClick={() => handleOdometryReset()} disabled={!isOdometryInitialized}>Reset Odometry</button>
+                    <button className='w3-button w3-blue' onClick={() => handleOdometryStop()} disabled={!isOdometryInitialized}>Stop Odometry</button>
+                    <button className='w3-button w3-blue' onClick={() => handleGetOdometry()} disabled={!isOdometryInitialized}>Get Odometry</button>
+                    <p>Odometry: X: {odometry.x.toFixed(2)}, Y: {odometry.y.toFixed(2)}, Theta: {odometry.t.toFixed(2)}</p>
+                </div>
             </div>
         </div>
     );

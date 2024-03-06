@@ -1,0 +1,4 @@
+.disabled-div {
+    pointer-events: none; /* Prevents clicking on elements inside the div */
+    opacity: 0.4;         /* Makes the div look faded or disabled */
+}
